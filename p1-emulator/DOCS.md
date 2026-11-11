@@ -22,10 +22,20 @@ sensors:
   total_gas_m3: sensor.gas_consumption
 ```
 
+For a fresh installation, the app already maps the standard DSMR entity IDs
+such as `sensor.power_consumption`, `sensor.power_production`,
+`sensor.energy_consumption_tarif_1`, the per-phase power/current/voltage
+sensors, voltage sag/swell counters, and power failure counters.
+
 `active_power_w` may be mapped directly, which is useful for CT-based sensors
 that already report signed net power. Otherwise the app derives it as imported
-power minus exported power. It also derives total imported/exported energy by
-adding configured tariff sensors.
+power minus exported power. Per-phase signed power is derived the same way from
+the separate per-phase consumption and production sensors. The app also derives
+total imported/exported energy by adding configured tariff sensors.
+
+`sensor.power_tariff` and `sensor.electricity_meter_timestamp` are not mapped
+because the HomeWizard P1 API v1 measurement response has no corresponding
+fields.
 
 The app converts common Home Assistant units automatically (for example kW to
 W, Wh to kWh, and litres to m³). Unknown, unavailable, and non-numeric states
@@ -56,4 +66,3 @@ HomeWizard fields one by one. The selections are stored back to the app's
 
 Values exist only in memory and are repopulated from current Home Assistant
 states whenever the app starts.
-

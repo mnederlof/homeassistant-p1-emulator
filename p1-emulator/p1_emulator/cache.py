@@ -21,6 +21,12 @@ INTEGER_FIELDS = {
 DERIVED_SOURCE_FIELDS = {
     "active_power_import_w",
     "active_power_export_w",
+    "active_power_import_l1_w",
+    "active_power_export_l1_w",
+    "active_power_import_l2_w",
+    "active_power_export_l2_w",
+    "active_power_import_l3_w",
+    "active_power_export_l3_w",
 }
 
 
@@ -115,13 +121,31 @@ class MeasurementCache:
             if field not in DERIVED_SOURCE_FIELDS
         }
         if "active_power_w" not in result:
-            imported = self._values.get("active_power_import_w")
-            exported = self._values.get("active_power_export_w")
-            if imported is not None or exported is not None:
-                result["active_power_w"] = (imported or 0) - (exported or 0)
+            self._derive_net_power(result, "active_power_w", "active_power_import_w", "active_power_export_w")
+        for phase in range(1, 4):
+            self._derive_net_power(
+                result,
+                f"active_power_l{phase}_w",
+                f"active_power_import_l{phase}_w",
+                f"active_power_export_l{phase}_w",
+            )
         self._derive_tariff_total(result, "total_power_import")
         self._derive_tariff_total(result, "total_power_export")
         return result
+
+    def _derive_net_power(
+        self,
+        result: dict[str, int | float],
+        target: str,
+        import_source: str,
+        export_source: str,
+    ) -> None:
+        if target in result:
+            return
+        imported = self._values.get(import_source)
+        exported = self._values.get(export_source)
+        if imported is not None or exported is not None:
+            result[target] = (imported or 0) - (exported or 0)
 
     @staticmethod
     def _derive_tariff_total(result: dict[str, int | float], prefix: str) -> None:
@@ -135,4 +159,3 @@ class MeasurementCache:
         ]
         if tariffs:
             result[total_field] = sum(tariffs)
-

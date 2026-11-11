@@ -18,6 +18,12 @@ FIELD_ORDER = [
     "active_power_w",
     "active_power_import_w",
     "active_power_export_w",
+    "active_power_import_l1_w",
+    "active_power_export_l1_w",
+    "active_power_import_l2_w",
+    "active_power_export_l2_w",
+    "active_power_import_l3_w",
+    "active_power_export_l3_w",
     "total_power_import_kwh",
     "total_power_import_t1_kwh",
     "total_power_import_t2_kwh",
@@ -190,9 +196,14 @@ def _sanitise_selection(raw: dict[str, object]) -> dict[str, str]:
     return result
 
 
-def create_web_app(settings: Settings, cache: MeasurementCache) -> web.Application:
+def create_web_app(
+    settings: Settings,
+    cache: MeasurementCache,
+    options_path: str | Path = "/data/options.json",
+) -> web.Application:
     app = web.Application()
     system_state = {"cloud_enabled": False}
+    options_file = Path(options_path)
 
     async def device_info(_: web.Request) -> web.Response:
         return web.json_response(
@@ -275,18 +286,17 @@ def create_web_app(settings: Settings, cache: MeasurementCache) -> web.Applicati
         object.__setattr__(settings, "sensors", sanitized)
         cache.set_mappings(sanitized)
 
-        options_path = Path("/data/options.json")
-        options_path.parent.mkdir(parents=True, exist_ok=True)
-        if options_path.exists():
+        options_file.parent.mkdir(parents=True, exist_ok=True)
+        if options_file.exists():
             try:
-                with options_path.open("r", encoding="utf-8") as handle:
+                with options_file.open("r", encoding="utf-8") as handle:
                     options = json.load(handle)
             except json.JSONDecodeError:
                 options = {}
         else:
             options = {}
         options["sensors"] = sanitized
-        with options_path.open("w", encoding="utf-8") as handle:
+        with options_file.open("w", encoding="utf-8") as handle:
             json.dump(options, handle, indent=2, sort_keys=True)
             handle.write("\n")
 

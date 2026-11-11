@@ -17,6 +17,8 @@ class MeasurementCacheTest(unittest.TestCase):
             {
                 "active_power_import_w": "sensor.import_power",
                 "active_power_export_w": "sensor.export_power",
+                "active_power_import_l1_w": "sensor.import_power_l1",
+                "active_power_export_l1_w": "sensor.export_power_l1",
                 "total_power_import_t1_kwh": "sensor.import_t1",
                 "total_power_import_t2_kwh": "sensor.import_t2",
                 "total_gas_m3": "sensor.gas",
@@ -25,6 +27,8 @@ class MeasurementCacheTest(unittest.TestCase):
 
         cache.update_state(state("sensor.import_power", "1.25", "kW"))
         cache.update_state(state("sensor.export_power", "50", "W"))
+        cache.update_state(state("sensor.import_power_l1", "400", "W"))
+        cache.update_state(state("sensor.export_power_l1", "25", "W"))
         cache.update_state(state("sensor.import_t1", "12000", "Wh"))
         cache.update_state(state("sensor.import_t2", "3", "kWh"))
         cache.update_state(state("sensor.gas", "2500", "L"))
@@ -33,6 +37,7 @@ class MeasurementCacheTest(unittest.TestCase):
             cache.snapshot(),
             {
                 "active_power_w": 1200,
+                "active_power_l1_w": 375,
                 "total_power_import_t1_kwh": 12,
                 "total_power_import_t2_kwh": 3,
                 "total_power_import_kwh": 15,
@@ -69,4 +74,3 @@ class MeasurementCacheTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

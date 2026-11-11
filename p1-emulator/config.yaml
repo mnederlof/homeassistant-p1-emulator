@@ -1,5 +1,5 @@
 name: P1 Meter Emulator
-version: "0.1.0"
+version: "0.1.1"
 slug: p1_emulator
 description: Expose Home Assistant energy sensors as a HomeWizard P1 Meter
 url: https://github.com/mnederlof/homeassistant-p1-emulator
@@ -19,18 +19,32 @@ options:
   smr_version: 50
   sensors:
     active_power_w: ""
-    active_power_import_w: ""
-    active_power_export_w: ""
-    total_power_import_t1_kwh: ""
-    total_power_import_t2_kwh: ""
-    total_power_export_t1_kwh: ""
-    total_power_export_t2_kwh: ""
-    active_voltage_l1_v: ""
-    active_voltage_l2_v: ""
-    active_voltage_l3_v: ""
-    active_current_l1_a: ""
-    active_current_l2_a: ""
-    active_current_l3_a: ""
+    active_power_import_w: sensor.power_consumption
+    active_power_export_w: sensor.power_production
+    active_power_import_l1_w: sensor.power_consumption_phase_l1
+    active_power_export_l1_w: sensor.power_production_phase_l1
+    active_power_import_l2_w: sensor.power_consumption_phase_l2
+    active_power_export_l2_w: sensor.power_production_phase_l2
+    active_power_import_l3_w: sensor.power_consumption_phase_l3
+    active_power_export_l3_w: sensor.power_production_phase_l3
+    total_power_import_t1_kwh: sensor.energy_consumption_tarif_1
+    total_power_import_t2_kwh: sensor.energy_consumption_tarif_2
+    total_power_export_t1_kwh: sensor.energy_production_tarif_1
+    total_power_export_t2_kwh: sensor.energy_production_tarif_2
+    active_voltage_l1_v: sensor.voltage_phase_l1
+    active_voltage_l2_v: sensor.voltage_phase_l2
+    active_voltage_l3_v: sensor.voltage_phase_l3
+    active_current_l1_a: sensor.current_phase_l1
+    active_current_l2_a: sensor.current_phase_l2
+    active_current_l3_a: sensor.current_phase_l3
+    voltage_sag_l1_count: sensor.voltage_sags_phase_l1
+    voltage_sag_l2_count: sensor.voltage_sags_phase_l2
+    voltage_sag_l3_count: sensor.voltage_sags_phase_l3
+    voltage_swell_l1_count: sensor.voltage_swells_phase_l1
+    voltage_swell_l2_count: sensor.voltage_swells_phase_l2
+    voltage_swell_l3_count: sensor.voltage_swells_phase_l3
+    any_power_fail_count: sensor.short_power_failure_count
+    long_power_fail_count: sensor.long_power_failure_count
     total_gas_m3: ""
 schema:
   port: port
@@ -42,6 +56,12 @@ schema:
     active_power_w: str?
     active_power_import_w: str?
     active_power_export_w: str?
+    active_power_import_l1_w: str?
+    active_power_export_l1_w: str?
+    active_power_import_l2_w: str?
+    active_power_export_l2_w: str?
+    active_power_import_l3_w: str?
+    active_power_export_l3_w: str?
     total_power_import_kwh: str?
     total_power_import_t1_kwh: str?
     total_power_import_t2_kwh: str?
@@ -73,4 +93,3 @@ schema:
     active_power_average_w: str?
     montly_power_peak_w: str?
     total_gas_m3: str?
-

@@ -1,4 +1,6 @@
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from aiohttp import ClientSession, web
 
@@ -9,6 +11,8 @@ from p1_emulator.config import Settings
 
 class ApiTest(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
+        self.temp_directory = TemporaryDirectory()
+        self.options_path = Path(self.temp_directory.name) / "options.json"
         settings = Settings(
             port=0,
             device_name="Test meter",
@@ -28,7 +32,9 @@ class ApiTest(unittest.IsolatedAsyncioTestCase):
                 "attributes": {"unit_of_measurement": "W"},
             }
         )
-        self.runner = web.AppRunner(create_web_app(settings, cache))
+        self.runner = web.AppRunner(
+            create_web_app(settings, cache, options_path=self.options_path)
+        )
         await self.runner.setup()
         self.site = web.TCPSite(self.runner, "127.0.0.1", 0)
         await self.site.start()
@@ -41,6 +47,7 @@ class ApiTest(unittest.IsolatedAsyncioTestCase):
     async def asyncTearDown(self) -> None:
         await self.session.close()
         await self.runner.cleanup()
+        self.temp_directory.cleanup()
 
     async def test_device_and_measurement_endpoints(self) -> None:
         async with self.session.get(f"{self.base_url}/api") as response:
@@ -75,6 +82,7 @@ class ApiTest(unittest.IsolatedAsyncioTestCase):
             body = await response.json()
         self.assertEqual(body["ok"], True)
         self.assertEqual(body["selected"]["active_power_w"], "sensor.other_power")
+        self.assertTrue(self.options_path.exists())
 
     async def test_system_state_is_mutable_and_validated(self) -> None:
         async with self.session.put(
