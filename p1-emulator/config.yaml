@@ -1,0 +1,76 @@
+name: P1 Meter Emulator
+version: "0.1.0"
+slug: p1_emulator
+description: Expose Home Assistant energy sensors as a HomeWizard P1 Meter
+url: https://github.com/mnederlof/homeassistant-p1-emulator
+arch:
+  - aarch64
+  - amd64
+init: false
+startup: services
+boot: auto
+host_network: true
+homeassistant_api: true
+options:
+  port: 80
+  device_name: P1 Meter
+  serial: "02A1B2C3D4E5"
+  meter_model: Home Assistant
+  smr_version: 50
+  sensors:
+    active_power_w: ""
+    active_power_import_w: ""
+    active_power_export_w: ""
+    total_power_import_t1_kwh: ""
+    total_power_import_t2_kwh: ""
+    total_power_export_t1_kwh: ""
+    total_power_export_t2_kwh: ""
+    active_voltage_l1_v: ""
+    active_voltage_l2_v: ""
+    active_voltage_l3_v: ""
+    active_current_l1_a: ""
+    active_current_l2_a: ""
+    active_current_l3_a: ""
+    total_gas_m3: ""
+schema:
+  port: port
+  device_name: str
+  serial: "match(^[0-9A-Fa-f]{12}$)"
+  meter_model: str
+  smr_version: int
+  sensors:
+    active_power_w: str?
+    active_power_import_w: str?
+    active_power_export_w: str?
+    total_power_import_kwh: str?
+    total_power_import_t1_kwh: str?
+    total_power_import_t2_kwh: str?
+    total_power_import_t3_kwh: str?
+    total_power_import_t4_kwh: str?
+    total_power_export_kwh: str?
+    total_power_export_t1_kwh: str?
+    total_power_export_t2_kwh: str?
+    total_power_export_t3_kwh: str?
+    total_power_export_t4_kwh: str?
+    active_power_l1_w: str?
+    active_power_l2_w: str?
+    active_power_l3_w: str?
+    active_voltage_l1_v: str?
+    active_voltage_l2_v: str?
+    active_voltage_l3_v: str?
+    active_current_l1_a: str?
+    active_current_l2_a: str?
+    active_current_l3_a: str?
+    active_frequency_hz: str?
+    voltage_sag_l1_count: str?
+    voltage_sag_l2_count: str?
+    voltage_sag_l3_count: str?
+    voltage_swell_l1_count: str?
+    voltage_swell_l2_count: str?
+    voltage_swell_l3_count: str?
+    any_power_fail_count: str?
+    long_power_fail_count: str?
+    active_power_average_w: str?
+    montly_power_peak_w: str?
+    total_gas_m3: str?
+

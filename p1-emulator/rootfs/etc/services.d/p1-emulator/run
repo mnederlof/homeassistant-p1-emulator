@@ -1,0 +1,3 @@
+#!/command/with-contenv sh
+exec /opt/p1-emulator/bin/python -m p1_emulator
+
