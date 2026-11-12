@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
+from random import random
 
 import aiohttp
 from aiohttp import web
@@ -223,6 +224,8 @@ def create_web_app(
                 "unique_id": settings.serial,
                 "smr_version": settings.smr_version,
                 "meter_model": settings.meter_model,
+                "wifi_ssid": "Ethernet",
+                "wifi_strength": random.randint(50, 100),
                 **values,
             }
         )
