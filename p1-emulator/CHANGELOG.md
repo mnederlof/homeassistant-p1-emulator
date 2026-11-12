@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.5
+
+- Fix api endpoint
+
 ## 0.1.4
 
 - Add simulated wifi coverage.
