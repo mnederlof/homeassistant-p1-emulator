@@ -16,8 +16,22 @@ from .home_assistant import HomeAssistantClient
 LOGGER = logging.getLogger(__name__)
 
 
+def ingress_port_from_environment() -> int:
+    raw_port = os.environ.get("INGRESS_PORT", "").strip()
+    if not raw_port:
+        raise ValueError("Home Assistant did not provide INGRESS_PORT")
+    try:
+        port = int(raw_port)
+    except ValueError as error:
+        raise ValueError(f"INGRESS_PORT is not a valid port: {raw_port!r}") from error
+    if not 1 <= port <= 65535:
+        raise ValueError(f"INGRESS_PORT is outside the valid range: {port}")
+    return port
+
+
 async def run() -> None:
     settings = load_settings()
+    ingress_port = ingress_port_from_environment()
     cache = MeasurementCache(settings.sensors)
     ha_client = HomeAssistantClient(settings, cache)
     api_runner = web.AppRunner(
@@ -27,9 +41,6 @@ async def run() -> None:
     api_site = web.TCPSite(api_runner, "0.0.0.0", settings.port)
     await api_site.start()
 
-    ingress_port = int(os.environ.get("INGRESS_PORT", "0"))
-    if ingress_port <= 0:
-        raise ValueError("INGRESS_PORT must be supplied by Home Assistant")
     ui_runner = web.AppRunner(
         create_web_app(
             settings,

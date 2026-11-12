@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.9
+
+- Read the dynamic ingress port through the compatible Bashio add-on function.
+- Fail with a clear startup message when Supervisor does not supply a valid
+  ingress port.
+
 ## 0.1.8
 
 - Fix relative API requests when the web UI is hosted below Home Assistant's

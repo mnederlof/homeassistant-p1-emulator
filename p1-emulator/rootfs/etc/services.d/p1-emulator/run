@@ -1,5 +1,10 @@
 #!/command/with-contenv sh
+
+INGRESS_PORT=$(bashio::addon.ingress_port)
+if [ -z "${INGRESS_PORT}" ]; then
+    bashio::log.fatal "Home Assistant did not provide an ingress port"
+    exit 1
+fi
 export INGRESS_PORT
-INGRESS_PORT=$(bashio::app.ingress_port)
 
 exec /opt/p1-emulator/bin/python -m p1_emulator
