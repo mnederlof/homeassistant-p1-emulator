@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.8
+
+- Fix relative API requests when the web UI is hosted below Home Assistant's
+  dynamic ingress path.
+- Restore authenticated Home Assistant state loading for both the emulator and
+  ingress UI.
+- Verify that the ingress listener rejects requests not forwarded by the
+  Supervisor while the LAN listener exposes only the HomeWizard API.
+
+## 0.1.7
+
+- Serve the sensor-selection UI through Home Assistant ingress only.
+- Keep the HomeWizard API and mDNS service available on the configured LAN port.
+
 ## 0.1.6
 
 - Add Home Assistant app icon and logo assets.

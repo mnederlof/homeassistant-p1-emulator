@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import signal
 
 from aiohttp import web
@@ -19,11 +20,28 @@ async def run() -> None:
     settings = load_settings()
     cache = MeasurementCache(settings.sensors)
     ha_client = HomeAssistantClient(settings, cache)
-    app = create_web_app(settings, cache)
-    runner = web.AppRunner(app, access_log=LOGGER)
-    await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", settings.port)
-    await site.start()
+    api_runner = web.AppRunner(
+        create_web_app(settings, cache, include_ui=False), access_log=LOGGER
+    )
+    await api_runner.setup()
+    api_site = web.TCPSite(api_runner, "0.0.0.0", settings.port)
+    await api_site.start()
+
+    ingress_port = int(os.environ.get("INGRESS_PORT", "0"))
+    if ingress_port <= 0:
+        raise ValueError("INGRESS_PORT must be supplied by Home Assistant")
+    ui_runner = web.AppRunner(
+        create_web_app(
+            settings,
+            cache,
+            include_ui=True,
+            require_ingress=True,
+        ),
+        access_log=LOGGER,
+    )
+    await ui_runner.setup()
+    ui_site = web.TCPSite(ui_runner, "0.0.0.0", ingress_port)
+    await ui_site.start()
     zeroconf, service_info = await register_service(settings)
     LOGGER.info(
         "Emulating HomeWizard P1 Meter %s on port %d with %d sensor mappings",
@@ -44,7 +62,8 @@ async def run() -> None:
         await asyncio.gather(ha_task, return_exceptions=True)
         await zeroconf.async_unregister_service(service_info)
         await zeroconf.async_close()
-        await runner.cleanup()
+        await ui_runner.cleanup()
+        await api_runner.cleanup()
 
 
 def main() -> None:
@@ -57,4 +76,3 @@ def main() -> None:
     except (OSError, ValueError) as error:
         LOGGER.critical("Unable to start P1 Meter Emulator: %s", error)
         raise SystemExit(1) from error
-

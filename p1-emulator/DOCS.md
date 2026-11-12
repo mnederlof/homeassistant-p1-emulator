@@ -71,11 +71,20 @@ already in use; the mDNS record advertises the configured port.
 
 ## Web UI
 
-Open the app at `http://<home-assistant-host>:<port>/` (for example
-`http://homeassistant.local:80/`) to choose the Home Assistant entities in a
-browser. The page lists all available entities and lets you assign the
-HomeWizard fields one by one. The selections are stored back to the app's
-`/data/options.json`, so they are retained across restarts.
+Open the app from the **P1 Meter Emulator** entry in the Home Assistant
+sidebar, or use the app's **Open Web UI** button. The UI is served through
+Home Assistant ingress and is not available on the LAN API port. Home
+Assistant handles authentication; no additional UI login is required.
+
+The page lists all available entities and lets you assign the HomeWizard fields
+one by one. The selections are stored back to the app's `/data/options.json`,
+so they are retained across restarts.
+
+The ingress listener combines the UI and API endpoints in the same app. Its
+random host-network port accepts only requests forwarded by the Home Assistant
+Supervisor. A separate listener on the configured LAN port exposes only the
+HomeWizard-compatible API for HomeWizard clients and mDNS discovery; UI routes
+return `404` there.
 
 Values exist only in memory and are repopulated from current Home Assistant
 states whenever the app starts.

@@ -1,5 +1,5 @@
 name: P1 Meter Emulator
-version: "0.1.6"
+version: "0.1.8"
 slug: p1_emulator
 description: Expose Home Assistant energy sensors as a HomeWizard P1 Meter
 url: https://github.com/mnederlof/homeassistant-p1-emulator
@@ -11,6 +11,10 @@ startup: services
 boot: auto
 host_network: true
 homeassistant_api: true
+ingress: true
+ingress_port: 0
+panel_icon: mdi:meter-electric
+panel_title: P1 Meter Emulator
 options:
   port: 80
   device_name: P1 Meter

@@ -136,8 +136,8 @@ UI_HTML = r"""
 
     async function loadData() {
       const [configResponse, statesResponse] = await Promise.all([
-        fetch('/api/ui/config'),
-        fetch('/api/states')
+          fetch('api/ui/config'),
+          fetch('api/states')
       ]);
       const config = await configResponse.json();
       const states = await statesResponse.json();
@@ -156,7 +156,7 @@ UI_HTML = r"""
       status.textContent = 'Saving...';
       status.className = 'status';
       try {
-        const response = await fetch('/api/ui/config', {
+        const response = await fetch('./api/ui/config', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ mappings: selected })
@@ -201,8 +201,23 @@ def create_web_app(
     settings: Settings,
     cache: MeasurementCache,
     options_path: str | Path = "/data/options.json",
+    include_ui: bool = True,
+    require_ingress: bool = False,
+    trusted_ingress_remote: str = "172.30.32.2",
 ) -> web.Application:
     app = web.Application()
+    if require_ingress:
+        @web.middleware
+        async def ingress_guard(
+            request: web.Request, handler: web.Handler
+        ) -> web.StreamResponse:
+            if request.remote != trusted_ingress_remote:
+                raise web.HTTPForbidden(
+                    text="This interface is only available through Home Assistant ingress"
+                )
+            return await handler(request)
+
+        app.middlewares.append(ingress_guard)
     system_state = {"cloud_enabled": False}
     options_file = Path(options_path)
 
@@ -332,16 +347,17 @@ def create_web_app(
         payload.sort(key=lambda item: item["entity_id"])
         return web.json_response(payload)
 
-    app.router.add_get("/", ui_index)
-    app.router.add_get("/ui", ui_index)
+    if include_ui:
+        app.router.add_get("/", ui_index)
+        app.router.add_get("/ui", ui_index)
+        app.router.add_get("/api/states", ha_states)
+        app.router.add_get("/api/ui/config", ui_config_get)
+        app.router.add_post("/api/ui/config", ui_config_post)
     app.router.add_get("/api", device_info)
     app.router.add_get("/api/v1", device_info)
     app.router.add_get("/api/v1/data", measurement)
     app.router.add_get("/api/v1/telegram", telegram)
     app.router.add_get("/api/v1/system", get_system)
-    app.router.add_get("/api/states", ha_states)
-    app.router.add_get("/api/ui/config", ui_config_get)
-    app.router.add_post("/api/ui/config", ui_config_post)
     app.router.add_put("/api/v1/system", put_system)
     app.router.add_put("/api/v1/identify", identify)
     return app
