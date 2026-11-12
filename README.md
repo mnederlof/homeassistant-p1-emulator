@@ -3,6 +3,8 @@
 This repository contains a Home Assistant app that exposes selected Home
 Assistant sensors as a HomeWizard P1 Meter on the local network.
 
+[![P1 Meter Emulator icon](p1-emulator/icon.png)](p1-emulator/)
+
 [![Add repository to my Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fmnederlof%2Fhomeassistant-p1-emulator)
 
 Click the button above to open Home Assistant and add this repository to the

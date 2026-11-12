@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.6
+
+- Add Home Assistant app icon and logo assets.
+
 ## 0.1.5
 
 - Fix api endpoint
