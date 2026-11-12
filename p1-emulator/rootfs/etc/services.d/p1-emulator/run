@@ -1,6 +1,6 @@
 #!/usr/bin/with-contenv bashio
 
-INGRESS_PORT=$(bashio::addon.ingress_port)
+INGRESS_PORT=$(bashio::app.ingress_port)
 if [ -z "${INGRESS_PORT}" ]; then
     bashio::log.fatal "Home Assistant did not provide an ingress port"
     exit 1

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.11
+
+- Use the current `bashio::app.ingress_port` function without the deprecated
+  add-on alias.
+
 ## 0.1.10
 
 - Run the service launcher with the Bashio interpreter so ingress and logging

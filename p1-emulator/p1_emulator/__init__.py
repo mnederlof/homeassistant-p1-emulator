@@ -1,3 +1,3 @@
 """HomeWizard P1 Meter emulator."""
 
-__version__ = "0.1.10"
+__version__ = "0.1.11"
