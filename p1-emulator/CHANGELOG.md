@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.10
+
+- Run the service launcher with the Bashio interpreter so ingress and logging
+  helper functions are available.
+
 ## 0.1.9
 
 - Read the dynamic ingress port through the compatible Bashio add-on function.
