@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4
+
+- Add simulated wifi coverage.
+
 ## 0.1.3
 
 - Enforce the HomeWizard API v1 measurement field set in API responses.
