@@ -19,7 +19,11 @@ class ApiTest(unittest.IsolatedAsyncioTestCase):
             serial="02A1B2C3D4E5",
             meter_model="Test model",
             smr_version=50,
-            sensors={"active_power_w": "sensor.power"},
+            sensors={
+                "active_power_w": "sensor.power",
+                "active_power_import_l1_w": "sensor.power_import_l1",
+                "active_power_export_l1_w": "sensor.power_export_l1",
+            },
             ha_rest_url="http://homeassistant/api",
             ha_websocket_url="ws://homeassistant/api/websocket",
             ha_token="test",
@@ -29,6 +33,20 @@ class ApiTest(unittest.IsolatedAsyncioTestCase):
             {
                 "entity_id": "sensor.power",
                 "state": "123",
+                "attributes": {"unit_of_measurement": "W"},
+            }
+        )
+        cache.update_state(
+            {
+                "entity_id": "sensor.power_import_l1",
+                "state": "100",
+                "attributes": {"unit_of_measurement": "W"},
+            }
+        )
+        cache.update_state(
+            {
+                "entity_id": "sensor.power_export_l1",
+                "state": "250",
                 "attributes": {"unit_of_measurement": "W"},
             }
         )
@@ -60,6 +78,9 @@ class ApiTest(unittest.IsolatedAsyncioTestCase):
             measurement = await response.json()
         self.assertEqual(measurement["unique_id"], "02A1B2C3D4E5")
         self.assertEqual(measurement["active_power_w"], 123)
+        self.assertEqual(measurement["active_power_l1_w"], -150)
+        self.assertNotIn("active_power_import_l1_w", measurement)
+        self.assertNotIn("active_power_export_l1_w", measurement)
 
     async def test_web_ui_is_served_and_config_can_be_saved(self) -> None:
         async with self.session.get(f"{self.base_url}/") as response:
@@ -68,7 +89,7 @@ class ApiTest(unittest.IsolatedAsyncioTestCase):
 
         async with self.session.get(f"{self.base_url}/api/ui/config") as response:
             payload = await response.json()
-        self.assertEqual(payload["selected"], {"active_power_w": "sensor.power"})
+        self.assertEqual(payload["selected"]["active_power_w"], "sensor.power")
 
         async with self.session.post(
             f"{self.base_url}/api/ui/config",

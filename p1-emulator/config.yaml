@@ -1,5 +1,5 @@
 name: P1 Meter Emulator
-version: "0.1.1"
+version: "0.1.3"
 slug: p1_emulator
 description: Expose Home Assistant energy sensors as a HomeWizard P1 Meter
 url: https://github.com/mnederlof/homeassistant-p1-emulator

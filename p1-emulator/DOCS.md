@@ -28,10 +28,23 @@ such as `sensor.power_consumption`, `sensor.power_production`,
 sensors, voltage sag/swell counters, and power failure counters.
 
 `active_power_w` may be mapped directly, which is useful for CT-based sensors
-that already report signed net power. Otherwise the app derives it as imported
-power minus exported power. Per-phase signed power is derived the same way from
-the separate per-phase consumption and production sensors. The app also derives
-total imported/exported energy by adding configured tariff sensors.
+that already report signed net power. If it is not mapped, the app sums the
+available signed L1, L2, and L3 values. Per-phase signed power is derived from
+the separate per-phase consumption and production sensors when needed. If no
+phase values are available, total active power falls back to total imported
+power minus total exported power. The app also derives total imported/exported
+energy by adding configured tariff sensors.
+
+The import/export mapping names are configuration inputs only. They are never
+included in `/api/v1/data`. For example, the L1 inputs are combined as:
+
+```text
+active_power_l1_w = active_power_import_l1_w - active_power_export_l1_w
+```
+
+The API response contains only the HomeWizard field `active_power_l1_w`, which
+is negative while L1 is exporting. L2, L3, and total active power follow the
+same rule.
 
 `sensor.power_tariff` and `sensor.electricity_meter_timestamp` are not mapped
 because the HomeWizard P1 API v1 measurement response has no corresponding

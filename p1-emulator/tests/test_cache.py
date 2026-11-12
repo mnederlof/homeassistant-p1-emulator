@@ -36,7 +36,7 @@ class MeasurementCacheTest(unittest.TestCase):
         self.assertEqual(
             cache.snapshot(),
             {
-                "active_power_w": 1200,
+                "active_power_w": 375,
                 "active_power_l1_w": 375,
                 "total_power_import_t1_kwh": 12,
                 "total_power_import_t2_kwh": 3,
@@ -45,11 +45,60 @@ class MeasurementCacheTest(unittest.TestCase):
             },
         )
 
+    def test_total_import_and_export_are_fallback_without_phase_power(self) -> None:
+        cache = MeasurementCache(
+            {
+                "active_power_import_w": "sensor.import_power",
+                "active_power_export_w": "sensor.export_power",
+            }
+        )
+        cache.update_state(state("sensor.import_power", "1.25", "kW"))
+        cache.update_state(state("sensor.export_power", "50", "W"))
+
+        self.assertEqual(cache.snapshot()["active_power_w"], 1200)
+
     def test_invalid_state_does_not_replace_last_value(self) -> None:
         cache = MeasurementCache({"active_power_w": "sensor.power"})
         cache.update_state(state("sensor.power", "100", "W"))
         cache.update_state(state("sensor.power", "unavailable", "W"))
         self.assertEqual(cache.snapshot()["active_power_w"], 100)
+
+    def test_derives_total_active_power_from_available_phases(self) -> None:
+        cache = MeasurementCache(
+            {
+                "active_power_l1_w": "sensor.power_l1",
+                "active_power_import_l2_w": "sensor.import_l2",
+                "active_power_export_l2_w": "sensor.export_l2",
+                "active_power_l3_w": "sensor.power_l3",
+            }
+        )
+        cache.update_state(state("sensor.power_l1", "250", "W"))
+        cache.update_state(state("sensor.import_l2", "100", "W"))
+        cache.update_state(state("sensor.export_l2", "350", "W"))
+        cache.update_state(state("sensor.power_l3", "50", "W"))
+
+        snapshot = cache.snapshot()
+
+        self.assertEqual(snapshot["active_power_l1_w"], 250)
+        self.assertEqual(snapshot["active_power_l2_w"], -250)
+        self.assertEqual(snapshot["active_power_l3_w"], 50)
+        self.assertEqual(snapshot["active_power_w"], 50)
+        self.assertNotIn("active_power_import_l2_w", snapshot)
+        self.assertNotIn("active_power_export_l2_w", snapshot)
+
+    def test_direct_total_active_power_takes_precedence_over_phase_sum(self) -> None:
+        cache = MeasurementCache(
+            {
+                "active_power_w": "sensor.total_power",
+                "active_power_l1_w": "sensor.power_l1",
+                "active_power_l2_w": "sensor.power_l2",
+            }
+        )
+        cache.update_state(state("sensor.total_power", "900", "W"))
+        cache.update_state(state("sensor.power_l1", "100", "W"))
+        cache.update_state(state("sensor.power_l2", "200", "W"))
+
+        self.assertEqual(cache.snapshot()["active_power_w"], 900)
 
     def test_advanced_mapping_supports_attribute_scale_and_offset(self) -> None:
         cache = MeasurementCache(

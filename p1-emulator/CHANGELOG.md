@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.3
+
+- Enforce the HomeWizard API v1 measurement field set in API responses.
+- Keep separate import/export mappings as internal inputs and expose only their
+  signed `active_power_w` and `active_power_l1_w`/L2/L3 results.
+
+## 0.1.2
+
+- Derive total active power by summing available L1, L2, and L3 power values
+  when no total active-power sensor is configured.
+
 ## 0.1.1
 
 - Add default mappings for standard Home Assistant DSMR sensor entity IDs.

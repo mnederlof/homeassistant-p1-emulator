@@ -18,17 +18,40 @@ INTEGER_FIELDS = {
     "long_power_fail_count",
 }
 
-DERIVED_SOURCE_FIELDS = {
-    "active_power_import_w",
-    "active_power_export_w",
-    "active_power_import_l1_w",
-    "active_power_export_l1_w",
-    "active_power_import_l2_w",
-    "active_power_export_l2_w",
-    "active_power_import_l3_w",
-    "active_power_export_l3_w",
+HOMEWIZARD_MEASUREMENT_FIELDS = {
+    "total_power_import_kwh",
+    "total_power_import_t1_kwh",
+    "total_power_import_t2_kwh",
+    "total_power_import_t3_kwh",
+    "total_power_import_t4_kwh",
+    "total_power_export_kwh",
+    "total_power_export_t1_kwh",
+    "total_power_export_t2_kwh",
+    "total_power_export_t3_kwh",
+    "total_power_export_t4_kwh",
+    "active_power_w",
+    "active_power_l1_w",
+    "active_power_l2_w",
+    "active_power_l3_w",
+    "active_voltage_l1_v",
+    "active_voltage_l2_v",
+    "active_voltage_l3_v",
+    "active_current_l1_a",
+    "active_current_l2_a",
+    "active_current_l3_a",
+    "active_frequency_hz",
+    "voltage_sag_l1_count",
+    "voltage_sag_l2_count",
+    "voltage_sag_l3_count",
+    "voltage_swell_l1_count",
+    "voltage_swell_l2_count",
+    "voltage_swell_l3_count",
+    "any_power_fail_count",
+    "long_power_fail_count",
+    "active_power_average_w",
+    "montly_power_peak_w",
+    "total_gas_m3",
 }
-
 
 @dataclass(frozen=True)
 class SensorMapping:
@@ -118,10 +141,8 @@ class MeasurementCache:
         result = {
             field: value
             for field, value in self._values.items()
-            if field not in DERIVED_SOURCE_FIELDS
+            if field in HOMEWIZARD_MEASUREMENT_FIELDS
         }
-        if "active_power_w" not in result:
-            self._derive_net_power(result, "active_power_w", "active_power_import_w", "active_power_export_w")
         for phase in range(1, 4):
             self._derive_net_power(
                 result,
@@ -129,6 +150,21 @@ class MeasurementCache:
                 f"active_power_import_l{phase}_w",
                 f"active_power_export_l{phase}_w",
             )
+        if "active_power_w" not in result:
+            phase_values = [
+                result[field]
+                for phase in range(1, 4)
+                if (field := f"active_power_l{phase}_w") in result
+            ]
+            if phase_values:
+                result["active_power_w"] = sum(phase_values)
+            else:
+                self._derive_net_power(
+                    result,
+                    "active_power_w",
+                    "active_power_import_w",
+                    "active_power_export_w",
+                )
         self._derive_tariff_total(result, "total_power_import")
         self._derive_tariff_total(result, "total_power_export")
         return result
